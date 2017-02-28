@@ -1,0 +1,20 @@
+{
+    "switches": {
+        "a01-sw1": {
+            "template": "2960g.conf",
+            "hostname": "a01-sw1",
+            "mgmt_vlan": 100,
+            "mgmt_addrconf": "10.0.0.101 255.255.255.0",
+            "mgmt_gw": "10.0.0.1",
+            "visitor_access_vlan": 100
+        }
+    },
+    "mapping": {
+        "e0:5f:b9:4e:3b:c0": {
+            "name": "lt-gw",
+            "maps": {
+                "4/38": "a01-sw1"
+            }
+        }
+    }
+}
