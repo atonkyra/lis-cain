@@ -86,8 +86,7 @@ def build_switch_info_dict(switch_config, config_dict):
     for key, value in config_dict['switchgroups'][switch_config['_include']].items():
         ret[key] = value
     for key, value in switch_config.items():
-        if key != '_include':
-            ret[key] = value
+        ret[key] = value
     return ret
 
 def get_config(remote_info):
@@ -103,6 +102,7 @@ def get_config(remote_info):
         logger.error('switch %s does not have configuration information', to_configure_switch_name)
         return StringIO.StringIO()
     to_configure_switch_info = build_switch_info_dict(config['switches'][to_configure_switch_name], config)
+    to_configure_switch_info['_hostname'] = to_configure_switch_name
     with open('%s/%s' % (config['template_directory'], to_configure_switch_info['template'])) as fp:
         logger.info("sending configuration to %s", to_configure_switch_name)
         content = fp.read()
