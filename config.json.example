@@ -1,12 +1,19 @@
 {
-    "switches": {
-        "a01-sw1": {
+    "template_directory": "/var/lis-cain/templates",
+    "switchgroups": {
+        "a-group": {
             "template": "2960g.conf",
-            "hostname": "a01-sw1",
             "mgmt_vlan": 100,
-            "mgmt_addrconf": "10.0.0.101 255.255.255.0",
+            "mgmt_netmask": "255.255.255.0",
             "mgmt_gw": "10.0.0.1",
             "visitor_access_vlan": 100
+        }
+    },
+    "switches": {
+        "a01-sw1": {
+            "_include": "a-group",
+            "hostname": "a01-sw1",
+            "mgmt_address": "10.0.0.101"
         }
     },
     "mapping": {

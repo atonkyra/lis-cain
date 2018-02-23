@@ -4,7 +4,7 @@ logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)-15s %(levelname)-8s %(name)-20s %(message)s'
 )
-import tftpy
+#import tftpy
 import StringIO
 import argparse
 import sys
@@ -47,7 +47,7 @@ class Reader(threading.Thread):
             ret = self.db[ip]
         self.db_lock.release()
         return ret
-        
+
 logger = logging.getLogger('lis-cain')
 logger.setLevel(logging.DEBUG)
 
@@ -65,10 +65,30 @@ with open(args.config) as fp:
 
 replace_data = None
 
+class ConfigException(Exception):
+    pass
+
 class ConfigFile(StringIO.StringIO):
     def close(self):
         logger.info("sent config to switch")
         return StringIO.StringIO.close(self)
+
+def build_switch_info_dict(switch_config, config_dict):
+    if '_include' not in switch_config:
+        return switch_config
+    if 'switchgroups' not in config_dict:
+        logger.error('switchgroups key missing from config while switches have _include clause(s)')
+        raise ConfigException()
+    if switch_config['_include'] not in config_dict['switchgroups']:
+        logger.error('target include key (%s) missing from config switchgroups', switch_config['_include'])
+        raise ConfigException()
+    ret = {}
+    for key, value in config_dict['switchgroups'][switch_config['_include']].items():
+        ret[key] = value
+    for key, value in switch_config.items():
+        if key != '_include':
+            ret[key] = value
+    return ret
 
 def get_config(remote_info):
     if remote_info['switch'] not in config['mapping']:
@@ -82,17 +102,17 @@ def get_config(remote_info):
     if to_configure_switch_name not in config['switches']:
         logger.error('switch %s does not have configuration information', to_configure_switch_name)
         return StringIO.StringIO()
-    to_configure_switch_info = config['switches'][to_configure_switch_name]
-    with open('templates/%s' % (to_configure_switch_info['template'])) as fp:
+    to_configure_switch_info = build_switch_info_dict(config['switches'][to_configure_switch_name], config)
+    with open('%s/%s' % (config['template_directory'], to_configure_switch_info['template'])) as fp:
         logger.info("sending configuration to %s", to_configure_switch_name)
         content = fp.read()
         out_data = content % to_configure_switch_info
-        ode = out_data.encode('ascii')
-        return ConfigFile(ode)
+        out_data_encoded = out_data.encode('ascii', errors='ignore')
+        return ConfigFile(out_data_encoded)
     return StringIO.StringIO()
 
 def serve_file(name, **kwargs):
-    remote_addr = kwargs['raddress']    
+    remote_addr = kwargs['raddress']
     remote_info = r.get_by_ip(remote_addr)
     if remote_info is not None:
         try:
