@@ -4,7 +4,7 @@ logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)-15s %(levelname)-8s %(name)-20s %(message)s'
 )
-#import tftpy
+import tftpy
 import StringIO
 import argparse
 import sys
