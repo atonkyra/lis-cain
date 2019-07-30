@@ -1,0 +1,21 @@
+{% for switch in switches %}
+{% for slave in switch.slaves %}
+interface {{ slave }}
+ no shutdown
+ description {{ switch.switch }}
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan {{ switch.vlans }}
+ channel-group {{ switch.ponum }} mode {{ switch.mode }}
+ load-interval 30
+{% endfor %}
+interface port-channel {{ switch.ponum }}
+ no shutdown
+ description {{ switch.switch }}
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan {{ switch.vlans }}
+ load-interval 30
+{% endfor %}

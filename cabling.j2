@@ -1,0 +1,8 @@
+Cabling info for {{ name }}
+{% for switch, ports in switches.items() %}
+{%- for port in ports %}
+{{ '{:8} | {}'.format(port, switch) }}
+{%- endfor %}
+{%- endfor %}
+
+
